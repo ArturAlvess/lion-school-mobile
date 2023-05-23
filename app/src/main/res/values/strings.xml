@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">LionSchool</string>
+    <string name="title">The best course’s school</string>
+    <string name="second_title">Let’s rock the future!</string>
+    <string name="description">Come and see the options.</string>
+    <string name="button_text">Get Started</string>
+    <string name="title_activity_course">CourseActivity</string>
+    <string name="search">Find a course</string>
+    <string name="courses">Courses</string>
+</resources>
