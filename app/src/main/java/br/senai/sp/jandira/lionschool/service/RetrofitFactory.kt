@@ -12,5 +12,7 @@ class RetrofitFactory {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-
+    fun getAllCourses(): CourseService{
+        return retrofitFactory.create(CourseService::class.java)
+    }
 }

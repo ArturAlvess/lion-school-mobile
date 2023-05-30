@@ -1,5 +1,6 @@
 package br.senai.sp.jandira.lionschool
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -38,6 +40,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     LionSchoolTheme {
+
+        val context = LocalContext.current
 
         // SURFACE GLOBAL
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -103,7 +107,11 @@ fun MainScreen() {
                             .height(80.dp)
                             .width(230.dp),
                         colors = ButtonDefaults.buttonColors(Color(51, 71, 176))
-                        ,onClick = { /*TODO*/ })
+                        ,onClick = {
+                            var openCourseActivity = Intent(context, CourseActivity::class.java)
+                            context.startActivity(openCourseActivity)
+                        }
+                    )
                     {
                         Text(text = stringResource(id = R.string.button_text),
                             color = Color.White,

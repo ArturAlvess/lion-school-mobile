@@ -43,3 +43,17 @@ fun BottomLine(){
 fun BottomLinePreview(){
     BottomLine()
 }
+
+@Composable
+fun CardLine(){
+    Card(modifier = Modifier
+        .height(2.dp)
+        .width(80.dp), backgroundColor = Color.White)
+    {}
+}
+
+@Preview
+@Composable
+fun CardLinePreview(){
+    CardLine()
+}
