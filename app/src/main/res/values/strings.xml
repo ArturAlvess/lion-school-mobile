@@ -8,4 +8,8 @@
     <string name="search">Find a course</string>
     <string name="courses">Courses</string>
     <string name="title_activity_student">StudentActivity</string>
+    <string name="button_all">All</string>
+    <string name="button_finished">Finished</string>
+    <string name="button_progress">In Progress</string>
+
 </resources>
