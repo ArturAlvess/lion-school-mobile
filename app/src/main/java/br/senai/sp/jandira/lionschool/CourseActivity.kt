@@ -1,5 +1,6 @@
 package br.senai.sp.jandira.lionschool
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +52,9 @@ class CourseActivity : ComponentActivity() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CourseScreen() {
+
+
+    val context = LocalContext.current
 
     var listCourses by remember {
         mutableStateOf(listOf<br.senai.sp.jandira.lionschool.model.Course>())
@@ -143,13 +148,19 @@ fun CourseScreen() {
 
                 LazyColumn(){
                     items(listCourses){
-                        Card(
-                            backgroundColor = Color(51, 71, 176),
+
+                        Button(
                             modifier = Modifier
                                 .width(400.dp)
                                 .height(200.dp)
                                 .padding(horizontal = 24.dp, vertical = 10.dp),
-                            shape = RoundedCornerShape(25.dp)
+                            shape = RoundedCornerShape(25.dp),
+                            colors = ButtonDefaults.buttonColors(Color(51, 71, 176))
+                            ,onClick = {
+                                var openStudentActivity = Intent(context, StudentActivity::class.java)
+                                openStudentActivity.putExtra("sigla", it.sigla)
+                                context.startActivity(openStudentActivity)
+                            }
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxSize(),
@@ -159,10 +170,10 @@ fun CourseScreen() {
                                     model = it.icone,
                                     colorFilter = ColorFilter.tint(Color.White),
                                     contentDescription = "Icone do curso",
-                                modifier = Modifier
-                                    .clip(shape = CircleShape)
-                                    .size(110.dp)
-                                    .padding(start = 10.dp)
+                                    modifier = Modifier
+                                        .clip(shape = CircleShape)
+                                        .size(110.dp)
+                                        .padding(start = 10.dp)
                                 )
                                 Column(modifier = Modifier.padding(start = 15.dp, top = 0.dp)) {
                                     Text(
@@ -189,8 +200,8 @@ fun CourseScreen() {
                                 }
 
                             }
-
                         }
+
                     }
                 }
                 Spacer(modifier = Modifier.size(80.dp))

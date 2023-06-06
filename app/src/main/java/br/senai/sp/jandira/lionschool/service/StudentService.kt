@@ -14,7 +14,7 @@ interface StudentService {
 
     @GET("alunos/")
     fun getStudentsBySiglaCurso(
-        @Query("sigla") name: String
+        @Query("curso") name: String
     ): Call<StudentsList>
 
     @GET("alunos/")

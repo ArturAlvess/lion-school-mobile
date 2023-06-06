@@ -1,26 +1,15 @@
 package br.senai.sp.jandira.lionschool
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonColors
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,27 +25,66 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.senai.sp.jandira.lionschool.components.TopLine
+import br.senai.sp.jandira.lionschool.model.StudentsList
+import br.senai.sp.jandira.lionschool.service.RetrofitFactory
 import br.senai.sp.jandira.lionschool.ui.theme.ui.theme.LionSchoolTheme
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class StudentActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val dados = intent.getStringExtra("sigla")
         setContent {
             LionSchoolTheme {
-                StudentScreen()
+                StudentScreen(dados.toString())
             }
         }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun StudentScreen() {
+fun StudentScreen(sigla: String) {
+
+    var listStudents by remember {
+        mutableStateOf(listOf<br.senai.sp.jandira.lionschool.model.Students>())
+    }
+
     // variáveis de estado:
 
     var inputState by remember() {
         mutableStateOf("")
     }
+
+    var nomeCurso by remember {
+        mutableStateOf("")
+    }
+
+    // chamada para a api
+    val callAlunos = RetrofitFactory().getAllStudents().getStudents()
+    val callAlunosCurso = RetrofitFactory().getAllStudents().getStudentsBySiglaCurso(sigla)
+
+    // executando a chamada
+    callAlunos.enqueue(object : Callback<StudentsList>{
+        override fun onResponse(
+            call: Call<StudentsList>,
+            response: Response<StudentsList>
+        ){
+            listStudents = response.body()!!.informacoes
+        }
+
+        override fun onFailure(call: Call<StudentsList>, t: Throwable) {
+            Log.i(
+                "ds2t",
+                "onFailure: ${t.message}"
+            )
+        }
+    })
+
+//    callAlunosCurso.enqueue(object : Callback<StudentsList>{
+//
+//    })
 
     LionSchoolTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -143,6 +171,22 @@ fun StudentScreen() {
                                 color = Color(51, 71, 176),
                                 fontSize = 10.sp
                             )
+                        }
+                    }
+                    LazyColumn(){
+                        items(listStudents){
+                            Card(modifier = Modifier
+                                .height(110.dp)
+                                .width(180.dp),
+                                backgroundColor = Color(51, 71, 176)
+                            ) {
+                                Column() {
+                                    Text(text = it.nome, fontSize = 18.sp)
+                                    Text(text = it.matricula, fontSize = 15.sp)
+                                    Text(text = it.status, fontSize = 12.sp)
+                                }
+
+                            }
                         }
                     }
                     Text(modifier = Modifier.padding(start = 100.dp, top = 20.dp)
