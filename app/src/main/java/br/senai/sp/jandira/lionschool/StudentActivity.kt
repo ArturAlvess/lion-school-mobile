@@ -1,10 +1,12 @@
 package br.senai.sp.jandira.lionschool
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,16 +20,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import br.senai.sp.jandira.lionschool.components.BottomLine
 import br.senai.sp.jandira.lionschool.components.TopLine
+import br.senai.sp.jandira.lionschool.model.Students
 import br.senai.sp.jandira.lionschool.model.StudentsList
 import br.senai.sp.jandira.lionschool.service.RetrofitFactory
 import br.senai.sp.jandira.lionschool.ui.theme.ui.theme.LionSchoolTheme
+import coil.compose.AsyncImage
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -47,10 +55,17 @@ class StudentActivity : ComponentActivity() {
 @Composable
 fun StudentScreen(sigla: String) {
 
+
+    val context = LocalContext.current
+
     var listStudents by remember {
         mutableStateOf(listOf<br.senai.sp.jandira.lionschool.model.Students>())
     }
+    var listStudents2 by remember {
+        mutableStateOf(listOf<br.senai.sp.jandira.lionschool.model.Students>())
+    }
 
+    var list: List<Students>
     // variáveis de estado:
 
     var inputState by remember() {
@@ -62,16 +77,17 @@ fun StudentScreen(sigla: String) {
     }
 
     // chamada para a api
-    val callAlunos = RetrofitFactory().getAllStudents().getStudents()
     val callAlunosCurso = RetrofitFactory().getAllStudents().getStudentsBySiglaCurso(sigla)
 
     // executando a chamada
-    callAlunos.enqueue(object : Callback<StudentsList>{
+    callAlunosCurso.enqueue(object : Callback<StudentsList>{
         override fun onResponse(
             call: Call<StudentsList>,
             response: Response<StudentsList>
         ){
+            nomeCurso = response.body()!!.nomeCurso
             listStudents = response.body()!!.informacoes
+            listStudents2 = response.body()!!.informacoes
         }
 
         override fun onFailure(call: Call<StudentsList>, t: Throwable) {
@@ -105,7 +121,7 @@ fun StudentScreen(sigla: String) {
                     OutlinedTextField(
                         value =
                         inputState,
-                        label = { Text(text = stringResource(id = R.string.search)) },
+                        label = { Text(text = stringResource(id = R.string.search_student)) },
                         onValueChange = {
                             inputState = it
                         },
@@ -126,17 +142,22 @@ fun StudentScreen(sigla: String) {
                     .fillMaxSize()
                     .padding(top = 20.dp)) {
                     Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 40.dp)) {
+                        .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         Button(
                             modifier = Modifier
-                                .width(100.dp),
+                                .width(100.dp)
+                                .padding(horizontal = 5.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults
                                 .buttonColors(
                                     Color(223, 223, 223)
                                 )
-                            ,onClick = { /*TODO*/ }
+                            ,onClick = {
+                                list = listStudents
+                                listStudents2 = list
+                            }
                         ) {
                             Text(
                                 text = stringResource(id = R.string.button_all),
@@ -144,13 +165,16 @@ fun StudentScreen(sigla: String) {
                         }
                         Button(
                             modifier = Modifier
-                                .width(100.dp),
+                                .width(100.dp)
+                                .padding(0.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults
                                 .buttonColors(
                                     Color(223, 223, 223)
                                 )
-                            ,onClick = { /*TODO*/ }
+                            ,onClick = {
+                                listStudents2 = listStudents.filter { it.status == "Finalizado" }
+                            }
                         ) {
                             Text(
                                 text = stringResource(id = R.string.button_finished),
@@ -158,13 +182,16 @@ fun StudentScreen(sigla: String) {
                         }
                         Button(
                             modifier = Modifier
-                                .width(100.dp),
+                                .width(120.dp)
+                                .padding(horizontal = 5.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults
                                 .buttonColors(
                                     Color(223, 223, 223)
                                 )
-                            ,onClick = { /*TODO*/ }
+                            ,onClick = {
+                                listStudents2 = listStudents.filter { it.status == "Cursando" }
+                            }
                         ) {
                             Text(
                                 text = stringResource(id = R.string.button_progress),
@@ -173,22 +200,36 @@ fun StudentScreen(sigla: String) {
                             )
                         }
                     }
-                    LazyColumn(){
-                        items(listStudents){
-                            Card(modifier = Modifier
-                                .height(110.dp)
-                                .width(180.dp),
-                                backgroundColor = Color(51, 71, 176)
-                            ) {
-                                Column() {
-                                    Text(text = it.nome, fontSize = 18.sp)
-                                    Text(text = it.matricula, fontSize = 15.sp)
-                                    Text(text = it.status, fontSize = 12.sp)
+                    Text(modifier = Modifier.padding(start = 30.dp, bottom = 10.dp) ,text = nomeCurso, color = Color(51, 71, 176), letterSpacing = 1.sp)
+                    LazyColumn(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally){
+                        items(listStudents2){
+                            Button(modifier = Modifier
+                                .height(270.dp)
+                                .width(290.dp)
+                                .padding(15.dp),
+                                colors = ButtonDefaults.buttonColors(changeColorbyStatus(it.status)),
+                                onClick = {
+                                    var openInfoStudentActivity = Intent(context, InfoStudentActivity::class.java)
+                                    openInfoStudentActivity.putExtra("matricula", it.matricula)
+                                    context.startActivity(openInfoStudentActivity)
                                 }
+                            ) {
+                                Row() {
+                                    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+
+                                        AsyncImage(model = it.foto, contentDescription = null)
+                                        Text(text = it.nome.toUpperCase(), fontSize = 15.sp, color = Color.White, textAlign = TextAlign.Center)
+                                        Text(text = it.matricula, fontSize = 15.sp, color = Color.White)
+                                        Text(text = it.status, fontSize = 12.sp, color = Color.White)
+
+                                    }
+                                }
+
 
                             }
                         }
                     }
+                    BottomLine()
                     Text(modifier = Modifier.padding(start = 100.dp, top = 20.dp)
                         ,text = "Redes de Computadores",
                         color = Color(51, 71, 176),
@@ -215,5 +256,13 @@ fun StudentScreen(sigla: String) {
             }
 
         }
+    }
+}
+
+fun changeColorbyStatus(status: String): Color{
+    return if (status == "Finalizado"){
+        Color(229, 182, 87)
+    } else{
+        Color(51, 71, 176)
     }
 }
